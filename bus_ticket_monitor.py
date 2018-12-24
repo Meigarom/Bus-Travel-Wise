@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # libraries
+import re
 import json
 import time
 import requests
@@ -39,42 +40,52 @@ response = requests.get( web_address )
 page = response.text
 soup = BeautifulSoup( page,"lxml" )
 
-#print( soup.prettify() )
+# ------------------------
+# get all seats available
+# ------------------------
+seats = soup.find_all( class_='available-seats' ) 
 
+df_seats = list()
+for seat in seats:
+    df_seats.append( int( re.findall( r'\d+', seat.get_text() )[0] )  )
+
+# ------------------------
+# get bus lines information
+# ------------------------
 buslines = soup.find_all( class_="search-item search-item-direct " )
-data = buslines[0]['data-content']
+for busline in buslines:
+    data = json.loads( busline['data-content'] )['trips'][0]
+    data_dict = { 'departureTime': data['departureTime'], 
+                  'company': data['companySlug'], 
+                  'arrivalDate': data['arrivalDate'], 
+                  'arrivalStation': data['arrivalStation'], 
+                  'departureStation': data['departureStation'],
+                  'arrivalTime': data['arrivalTime'],
+                  'departureDate': data['departureDate'], 
+                  'durationTime': data['durationTime'] }
+    print( data_dict )
 
-print( buslines[0]['data-content'] ) 
-print( type( buslines[0]['data-content'] ) )
 
+## create dataframe
+#df = pd.DataFrame( [ {'departureTime': data['trips'][0]['departureTime'], 
+#                     'company': data['trips'][0]['companySlug'], 
+#                     'arrivalDate': data['trips'][0]['arrivalDate'], 
+#                     'arrivalStation': data['trips'][0]['arrivalStation'], 
+#                     'departureStation': data['trips'][0]['departureStation'],
+#                     'arrivalTime': data['trips'][0]['arrivalTime'],
+#                     'departureDate': data['trips'][0]['departureDate'], 
+#                     'durationTime': data['trips'][0]['durationTime'] } ] )
+#
+#print( df )
+#
 # Convert to dataframe
-df = pd.DataFrame.from_dict( json.loads( data ) )
 
-# available seats
-#seats = buslines[0].find( class_='available-seats' ).get_text()
-
-# 
-
-
-## seats available
-#seats = soup.find_all( class_='available-seats' ) 
-#for seat in seats:
-#    print( seat.get_text() )
 
 
 #print( len( soup.find_all( class_='available-seats' ) ) )
 #print( soup.find_all( class_='available-seats' )[0].get_text() )
 
-#table = driver.find_element_by_xpath( '//*[@id="search-item-details"]/div[2]/div[2]/ul' )
-#table = driver.find_element_by_class_name( 'bus-seats' )
 
-#seat = driver.find_element_by_xpath( '//*[@id="search-item-details"]/div[2]/div[2]/ul/li[6]/span' )
-
-#print( seat.text )
-
-## count how many places are available
-#html = driver.page_source
-#soup = bso( web_address )
 #print( soup )
 #for tag in soup.find_all( 'title' ):
 #    print( tag.text )
