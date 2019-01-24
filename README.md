@@ -16,6 +16,8 @@ This solutions has 3 main tasks:
 - Send a recommendation message to mobile phone says the best day to buy the tickets
 
 ## Business Question
+- What is the best time to buy a bus ticket?
+- How close does the the departure time the bus gets full?
 
 > "To think is to forget differences, generalize, make abstractions." - Borges
 
